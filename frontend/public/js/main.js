@@ -1,70 +1,55 @@
-function disable_refresh_btn(state) {
-    $('#refresh_btn').prop('disabled', state);
+var mid = 'http://localhost:5000/musicfy/';
+
+function disable_box(state) {
+    $("#genero").attr("disabled", state);
 }
 
-function disable_get_btn(state) {
-    $('#get_lote').prop('disabled', state);
-}
+$(document).ready(function () {
+    console.log('ready');
 
-function make_lotes_options(arr) {
-    var options = '<option value="_placeholder">Selecione o Lote</option>';
-    for (var i = 0; i < arr.length; i++) {
-        options += `<option value="${arr[i]}">${arr[i]}</option>\n`;
-    }
-    return options;
-}
-
-function get_lotes() {
     $.ajax({
-        url: 'http://localhost:5000/toddy/listarLotes',
+        url: mid + 'listarGeneros',
         beforeSend: () => {
-            disable_refresh_btn(true);
+            console.log(`before send`);
+            disable_box(true);
         }
-    }).done(data => {
-        $('#lotes').html(make_lotes_options(data));
-    }).fail(() => {
-        alert(`Não foi possível buscar os lotes`);
-    }).always(() => {
-        disable_refresh_btn(false);
-    });
-}
-
-function make_lote_table(data) {
-    var table = "";
-    for (var i = 0; i < data.length; i++) {
-        table += "<tr>\n";
-        table += `<td>${data[i]._id}</td>\n`;
-        table += `<td>${data[i].lote}</td>\n`;
-        table += `<td>${data[i].conteudo}</td>\n`;
-        table += `<td>${data[i].validade}</td>\n`; 
-        table += "</tr>\n";
-    }
-    return table;
-}
-
-function get_single_lote() {
-    const lote = $('#lotes').val();
-
-    if (lote === '_placeholder') {
-        alert('Por favor, selecione um lote');
-    } else {
-        $.ajax({
-            url: `http://localhost:5000/toddy/listar?lote=${lote}`,
-            beforeSend: () => {
-                disable_get_btn(true);
-            }
-        }).done(data => {
-            $("#lote-table-body").html(make_lote_table(data));
-        }).fail(() => {
-            alert(`Não foi possível buscar o lote ${lote}`);
-        }).always(() => {
-            disable_get_btn(false);
+    }).done(result => {
+        console.log(`received results: ${JSON.stringify(result)}`);
+        $.each(result, function (indice, genero) {
+            $("#genero").append(`<option value="` + genero.descricao + `">` + genero.descricao + `</option>`);
         });
-    }
-}
+    }).fail((err) => {
+        alert(`Erro: ${JSON.stringify(err)}`);
+    }).always(() => {
+        disable_box(false);
+    });
 
-$(document).ready(() => {
-    get_lotes();
-    $('#refresh_btn').click(get_lotes);
-    $('#get_lote').click(get_single_lote);
+    $("#genero").change(() => {
+        //$("#tabela > tbody").empty();
+        $("#lista").empty();
+
+        var genero_id = this.value;
+
+        $.ajax({
+            url: mid + 'buscarMusicaPorGenero?genero_id=' + genero_id,
+            beforeSend: () => {
+                disable_box(true);
+            }
+        }).done(result => {
+            console.log(`received results: ${JSON.stringify(result)}`);
+            $.each(result, function (indice, musica) {
+                $("#lista").append(`<ul>`
+                    + `<li>` + musica.musica_id + `</td>`
+                    + `<ul>`
+                    + `<li>` + musica.titulo + `ml</td>`
+                    + `<li>` + musica.artista + `</td>`
+                    + `</ul>`
+                    + `</ul>`);
+            });
+        }).fail((err) => {
+            alert(`Erro: ${JSON.stringify(err)}`);
+        }).always(() => {
+            disable_box(false);
+        });
+    });
 });
