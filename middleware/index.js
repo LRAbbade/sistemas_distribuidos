@@ -10,7 +10,7 @@ server.use(restify.plugins.queryParser());
 const cors = corsMiddleware({
 	origins: ["*"],
 	allowHeaders: ["API-Token"],
-	exposeHeaders: ["API-Token-Expiry"]
+	exposeHeaders: ["API-Token-Expiry", "Access-Control-Allow-Origin"]
 });
 
 server.pre(cors.preflight);
@@ -28,6 +28,18 @@ server.get('/get_musicas', (req, res, next) => {
 
 server.get('/musicfy/listarGenero', (req, res, next) => {
 	dao.listarGeneros((data) => res.json(data));
+	next();
+});
+
+server.get('/musicfy/buscarMusicaPorGenero', (req, res, next) => {
+	const genero_id = req.query.genero_id;
+	
+	if (genero_id === undefined) {
+		res.send(`undefined genero id`);
+	} else {
+		dao.getMusicasByGenero(genero_id, (data) => res.json(data));
+	}
+
 	next();
 });
 
