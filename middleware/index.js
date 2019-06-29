@@ -22,7 +22,13 @@ server.get('/', (req, res, next) => {
 });
 
 server.get('/get_musicas', (req, res, next) => {
-	dao.test((data) => res.send(data));
+	dao.getMusicas((data) => res.send(data));
+	next();
+});
+
+server.get('/musicfy/listarGenero', (req, res, next) => {
+	dao.listarGeneros((data) => res.json(data));
+	next();
 });
 
 const PORT = 5000;
