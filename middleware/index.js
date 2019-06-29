@@ -10,7 +10,7 @@ server.use(restify.plugins.queryParser());
 const cors = corsMiddleware({
 	origins: ["*"],
 	allowHeaders: ["API-Token"],
-	exposeHeaders: ["API-Token-Expiry", "Access-Control-Allow-Origin"]
+	exposeHeaders: ["API-Token-Expiry"]
 });
 
 server.pre(cors.preflight);
